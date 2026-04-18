@@ -629,14 +629,22 @@ document.getElementById('cm-ok').onclick=()=>{ document.getElementById('confirm-
 // ═══════════════════════════════════════════════════
 // TAB NAVIGATION
 // ═══════════════════════════════════════════════════
-document.querySelectorAll('.nav-tab').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+function wireNavTabs(){
+  document.querySelectorAll('.nav-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      var panel=document.getElementById('tab-'+btn.dataset.tab);
+      if(panel) panel.classList.add('active');
+    });
   });
-});
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', wireNavTabs);
+} else {
+  wireNavTabs();
+}
 
 // ═══════════════════════════════════════════════════
 // ════════════ TAB 1: LOADOUT ════════════════════════
@@ -4660,11 +4668,20 @@ needsSave=true;
 });
 if(needsSave) store.set(‘allPlannerData’,allPlannerData);
 })();
+// Show visible error on iPad/iPhone if anything fails
+window.onerror = function(msg, src, line, col, err) {
+var box = document.createElement(‘div’);
+box.style.cssText = ‘position:fixed;top:0;left:0;right:0;z-index:9999;background:#f04a4a;color:#fff;padding:16px;font-family:monospace;font-size:13px;white-space:pre-wrap;’;
+box.textContent = ’JS ERROR (line ’ + line + ‘):\n’ + msg + ’\n\nSource: ’ + src;
+document.body.appendChild(box);
+return false;
+};
+
+try {
 renderProfiles();
 renderPlannerProfileSelect();
 renderPlannerHeader();
 renderEnclosurePanel();
-// wire enclosure panel toggle
 (function(){
 var head=document.getElementById(‘enc-panel-head’);
 if(head) head.onclick=function(){
@@ -4683,6 +4700,13 @@ renderDopeTable();
 renderRangeCard();
 updatePlannerSub();
 updateCourseStats();
+
+} catch(e) {
+var box = document.createElement(‘div’);
+box.style.cssText = ‘position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0d0f0e;color:#f04a4a;padding:24px;font-family:monospace;font-size:13px;overflow:auto;white-space:pre-wrap;’;
+box.textContent = ‘STARTUP ERROR — please screenshot this and send to your developer:\n\n’ + e.name + ’: ’ + e.message + ‘\n\nStack:\n’ + e.stack;
+document.body.appendChild(box);
+}
 </script>
 
 </body>
